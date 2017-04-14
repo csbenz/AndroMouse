@@ -1,13 +1,16 @@
 package com.lesbobets.smartmouse;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.VelocityTrackerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -19,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
 
     private View v;
 
-    private Client mClient;
+    private ServerContacter mServerContacter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +40,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void initClient() {
         try {
-            mClient = new Client();
+            mServerContacter = new ServerContacter();
             Log.d(TAG, "Initialized Client successfully");
+            Toast.makeText(this, "Initialized Client successfully", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
             Log.d(TAG, "initClient: Failed to initialize");
@@ -70,7 +74,19 @@ public class MainActivity extends AppCompatActivity {
                             pointerId);
 
                     Log.d(TAG, " Velocities: " + xVelocity + "\t\t" + yVelocity);
-                    mClient.send(xVelocity, yVelocity);
+
+                    new AsyncTask<Pair<Float, Float>, Void, Void>() {
+
+                        @Override
+                        protected Void doInBackground(Pair<Float, Float>... vs) {
+                            if (mServerContacter != null) {
+                                Pair<Float, Float> v = vs[0];
+                                mServerContacter.send(v.first, v.second);
+                            }
+                            return null;
+                        }
+                    }.execute(Pair.create(xVelocity, yVelocity));
+
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:

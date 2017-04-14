@@ -16,11 +16,12 @@ public class Server {
         final Socket clientSocket;
         final BufferedReader in;
         final PrintWriter out;
-        final Scanner sc = new Scanner(System.in);
 
         try {
             serveurSocket = new ServerSocket(8000);
+            System.out.println("Server launched !");
             clientSocket = serveurSocket.accept();
+            System.out.println("A client has connected !");
             out = new PrintWriter(clientSocket.getOutputStream());
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
