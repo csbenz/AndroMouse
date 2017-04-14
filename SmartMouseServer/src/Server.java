@@ -5,7 +5,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Scanner;
 
 
 public class Server {
@@ -52,12 +51,11 @@ public class Server {
     }
 
     private static void updateCursor(String newPos) {
-        double alpha = 1.0; /// This is a factor of speed we could be changing (User speed)
+        double alpha = 0.01; /// This is a factor of speed we could be changing (User speed)
         String[] stringPos = newPos.split(",");
         double vx = Double.parseDouble(stringPos[0]);
         double vy = Double.parseDouble(stringPos[1]);
 
-        // TODO: Robot thing but need to be separated
         try {
             /// The robot useful to move the mouse then
             Robot robot = new Robot();
