@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             mServerContacter = new ServerContacter();
             Log.d(TAG, "Initialized Client successfully");
+            Toast.makeText(this, "Initialized Client successfully", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
             Log.d(TAG, "initClient: Failed to initialize");
@@ -70,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
                             pointerId);
 
                     Log.d(TAG, " Velocities: " + xVelocity + "\t\t" + yVelocity);
-                    
+
                     if (mServerContacter != null) {
                         mServerContacter.send(xVelocity, yVelocity);
                     }
