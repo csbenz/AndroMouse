@@ -58,11 +58,16 @@ public class Server {
 
         // TODO: Robot thing but need to be separated
         try {
+            /// The robot useful to move the mouse then
             Robot robot = new Robot();
+
+            /// Get current mouse position
+            Point pos = MouseInfo.getPointerInfo().getLocation();
 
             // Auto delay
             robot.setAutoDelay(40);
             robot.setAutoWaitForIdle(true);
+            robot.mouseMove((int)(alpha*(pos.x+vx)), (int)(alpha*(pos.y+vy)));
 
         } catch (AWTException e) {
             e.printStackTrace();
