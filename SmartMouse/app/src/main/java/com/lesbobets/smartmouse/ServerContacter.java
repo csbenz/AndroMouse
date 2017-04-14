@@ -5,16 +5,16 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Arrays;
 
-public class Client {
+public class ServerContacter {
 
     private Socket clientSocket;
     private PrintWriter out;
 
-    public Client() throws IOException {
+    public ServerContacter() throws IOException {
         this("127.0.0.1", 8000);
     }
 
-    public Client(String ipAddress, int port) throws IOException {
+    public ServerContacter(String ipAddress, int port) throws IOException {
         clientSocket = new Socket(ipAddress, port);
         out = new PrintWriter(clientSocket.getOutputStream());
     }

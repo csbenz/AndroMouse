@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
     private View v;
 
-    private Client mClient;
+    private ServerContacter mServerContacter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initClient() {
         try {
-            mClient = new Client();
+            mServerContacter = new ServerContacter();
             Log.d(TAG, "Initialized Client successfully");
         } catch (IOException e) {
             e.printStackTrace();
@@ -70,7 +70,11 @@ public class MainActivity extends AppCompatActivity {
                             pointerId);
 
                     Log.d(TAG, " Velocities: " + xVelocity + "\t\t" + yVelocity);
-                    mClient.send(xVelocity, yVelocity);
+                    
+                    if (mServerContacter != null) {
+                        mServerContacter.send(xVelocity, yVelocity);
+                    }
+
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
