@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
                     mVelocityTracker.recycle();
+                    mVelocityTracker = null;
                     break;
             }
             return true;
