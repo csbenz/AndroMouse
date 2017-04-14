@@ -25,12 +25,12 @@ public class ServerContacter {
 
     public void send(final double xVelocity, final double yVelocity) {
 
-        final double[] velocities = new double[]{xVelocity, yVelocity};
+//        final double[] velocities = new double[]{xVelocity, yVelocity};
 
         new Thread(new Runnable() {
             @Override
             public void run() {
-                out.println(Arrays.toString(velocities));
+                out.println(xVelocity + "," + yVelocity);
                 out.flush();
             }
         }).start();

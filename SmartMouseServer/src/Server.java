@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public class Server {
 
-    public static void main(String[] test) {
+    public static void main(String[] args) {
 
         final ServerSocket serveurSocket;
         final Socket clientSocket;
