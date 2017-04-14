@@ -78,7 +78,7 @@ public class Server {
     }
 
     private static void updateCursor(double vx, double vy) {
-        double alpha = 0.05; /// This is a factor of speed we could be changing (User speed)
+        double alpha = 0.02; /// This is a factor of speed we could be changing (User speed)
 
         try {
             /// The robot useful to move the mouse then

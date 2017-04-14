@@ -26,6 +26,17 @@ public class MainActivity extends AppCompatActivity implements
     private AsyncTask<Double[], Void, Void> mAsyncTask;
     private GestureDetectorCompat mDetector;
 
+
+    TwoFingersDetector multiTouchListener = new TwoFingersDetector() {
+        @Override
+        public void onTwoFingerTap() {
+            if (mServerContacter != null) {
+                mServerContacter.sendRightClick();
+            }
+        }
+    };
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,14 +45,10 @@ public class MainActivity extends AppCompatActivity implements
         setSupportActionBar(toolbar);
 
         mDetector = new GestureDetectorCompat(this, this);
-
         mDetector.setOnDoubleTapListener(this);
 
-        v = findViewById(R.id.touch_view);
-
-
-//        v.setOnTouchListener(mOnTouchListener);
-
+//        v = findViewById(R.id.touch_view);
+//        mDetector.setOnTouchListener(mOnTouchListener);
 //        mAsyncTask = new SendAsyncTask();
         initClient();
     }
@@ -121,7 +128,9 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public boolean onTouchEvent(MotionEvent event){
+        this.multiTouchListener.onTouchEvent(event);
         this.mDetector.onTouchEvent(event);
+
         // Be sure to call the superclass implementation
         return super.onTouchEvent(event);
     }
@@ -136,10 +145,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public boolean onDoubleTap(MotionEvent e) {
-        if (mServerContacter != null) {
-            mServerContacter.sendRightClick();
-        }
-        return true;
+        return false;
     }
 
     @Override
@@ -204,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onLongPress(MotionEvent e) {
+    public void onLongPress(MotionEvent event) {
 
     }
 
