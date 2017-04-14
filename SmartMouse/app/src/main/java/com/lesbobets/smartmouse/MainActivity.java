@@ -44,21 +44,17 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         mVelocityTracker.clear();
                     }
-                    // Add a user's movement to the tracker.
                     mVelocityTracker.addMovement(event);
                     break;
                 case MotionEvent.ACTION_MOVE:
                     mVelocityTracker.addMovement(event);
-                    // When you want to determine the velocity, call
-                    // computeCurrentVelocity(). Then call getXVelocity()
-                    // and getYVelocity() to retrieve the velocity for each pointer ID.
                     mVelocityTracker.computeCurrentVelocity(1000);
-                    Log.d("", "X velocity: " +
-                            VelocityTrackerCompat.getXVelocity(mVelocityTracker,
-                                    pointerId));
-                    Log.d("", "Y velocity: " +
-                            VelocityTrackerCompat.getYVelocity(mVelocityTracker,
-                                    pointerId));
+                    float xVelocity = VelocityTrackerCompat.getXVelocity(mVelocityTracker,
+                            pointerId);
+                    float yVelocity = VelocityTrackerCompat.getYVelocity(mVelocityTracker,
+                            pointerId);
+
+                    Log.d(TAG, " Velocities: " + xVelocity + "\t\t" + yVelocity);
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
