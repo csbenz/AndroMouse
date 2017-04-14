@@ -14,15 +14,15 @@ public class Client {
         out = new PrintWriter(clientSocket.getOutputStream());
     }
 
-    public void send(float x, float y) {
+    public void send(double[] coord) {
 
-        final float [] coord = {x,y};
+        final double [] coordBis = coord;
 
         Thread envoyer = new Thread(new Runnable() {
             String msg;
             @Override
             public void run() {
-                out.println(coord);
+                out.println(coordBis);
                 out.flush();
             }
         });
