@@ -11,7 +11,6 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
-import android.view.ViewConfiguration;
 
 public class MainActivity extends AppCompatActivity implements
         GestureDetector.OnGestureListener,
@@ -26,6 +25,8 @@ public class MainActivity extends AppCompatActivity implements
     private ServerContacter mServerContacter;
     private AsyncTask<Double[], Void, Void> mAsyncTask;
     private GestureDetectorCompat mDetector;
+
+    private long lastPushDownTime = 0;
 
 
     TwoFingersDetector multiTouchListener = new TwoFingersDetector() {
@@ -100,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements
 //    };
 
     @Override
-    public boolean onTouchEvent(MotionEvent event){
+    public boolean onTouchEvent(MotionEvent event) {
         this.multiTouchListener.onTouchEvent(event);
         this.mDetector.onTouchEvent(event);
 
@@ -116,8 +117,12 @@ public class MainActivity extends AppCompatActivity implements
                     mVelocityTracker.clear();
                 }
                 mVelocityTracker.addMovement(event);
+                lastPushDownTime = System.currentTimeMillis();
                 break;
             case MotionEvent.ACTION_MOVE:
+                if (System.currentTimeMillis() - lastPushDownTime < 50) {
+                    return super.onTouchEvent(event);
+                }
                 mVelocityTracker.addMovement(event);
                 mVelocityTracker.computeCurrentVelocity(1000);
                 float xVelocity = VelocityTrackerCompat.getXVelocity(mVelocityTracker, pointerId);
