@@ -8,9 +8,10 @@ public class Client {
 
     private Socket clientSocket;
     private PrintWriter out;
+    private String myIp = "192.168.8.107";
 
     public Client() throws IOException {
-        this("127.0.0.1", 8000);
+        this("192.168.8.107", 8000);
     }
 
     public Client(String ipAddress, int port) throws IOException {
