@@ -9,6 +9,8 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 
+import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
@@ -16,6 +18,8 @@ public class MainActivity extends AppCompatActivity {
     private VelocityTracker mVelocityTracker = null;
 
     private View v;
+
+    private Client mClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +32,17 @@ public class MainActivity extends AppCompatActivity {
 
         v.setOnTouchListener(mOnTouchListener);
 
+        initClient();
+    }
+
+    private void initClient() {
+        try {
+            mClient = new Client();
+            Log.d(TAG, "Initialized Client successfully");
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.d(TAG, "initClient: Failed to initialize");
+        }
     }
 
     private View.OnTouchListener mOnTouchListener = new View.OnTouchListener() {
@@ -55,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
                             pointerId);
 
                     Log.d(TAG, " Velocities: " + xVelocity + "\t\t" + yVelocity);
+                    mClient.send(xVelocity, yVelocity);
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:

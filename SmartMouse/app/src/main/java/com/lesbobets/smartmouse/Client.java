@@ -3,6 +3,7 @@ package com.lesbobets.smartmouse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class Client {
 
@@ -19,11 +20,14 @@ public class Client {
         out = new PrintWriter(clientSocket.getOutputStream());
     }
 
-    public void send(final double[] coord) {
+    public void send(final double xVelocity, final double yVelocity) {
+
+        final double[] velocities = new double[]{xVelocity, yVelocity};
+
         new Thread(new Runnable() {
             @Override
             public void run() {
-                out.println(coord);
+                out.println(Arrays.toString(velocities));
                 out.flush();
             }
         }).start();
