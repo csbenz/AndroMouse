@@ -5,7 +5,6 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Arrays;
 
 public class ServerContacter {
 
@@ -39,21 +38,19 @@ public class ServerContacter {
     }
 
     public void send(final double xVelocity, final double yVelocity) {
-        final Double[] velocities = new Double[]{xVelocity, yVelocity};
-        send(velocities);
-    }
 
-    public void send(final Double[] velocities) {
-//        out.println(Arrays.toString(velocities));
-//        out.flush();
         new Thread(new Runnable() {
             @Override
             public void run() {
                 if (clientSocket != null && out != null) {
-                    out.println(Arrays.toString(velocities));
+                    out.println(xVelocity + "," + yVelocity);
                     out.flush();
                 }
             }
         }).start();
+    }
+
+    public void send(final Double[] velocities) {
+        send(velocities[0], velocities[1]);
     }
 }
