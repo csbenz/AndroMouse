@@ -7,9 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
 
-/*
- * www.codeurjava.com
- */
+
 public class Server {
 
     public static void main(String[] test) {
@@ -33,12 +31,14 @@ public class Server {
                 public void run() {
                     try {
                         msg = in.readLine();
-                        //tant que le client est connecté
+                        // tant que le client est connecté
                         while (msg != null) {
                             System.out.println("Client : " + msg);
                             msg = in.readLine();
+                            /// We update the mouse location in the screen according to the received message
+                            updateCursor(msg);
                         }
-                        //sortir de la boucle si le client a déconecté
+                        // sortir de la boucle si le client s'est déconnecté
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -50,8 +50,8 @@ public class Server {
         }
     }
 
-    public void updateCursor(String newPos) {
-        double alpha = 1.0; /// This is a factor of speed we could be changing
+    private static void updateCursor(String newPos) {
+        double alpha = 1.0; /// This is a factor of speed we could be changing (User speed)
         String[] stringPos = newPos.split(",");
         double vx = Double.parseDouble(stringPos[0]);
         double vy = Double.parseDouble(stringPos[1]);
@@ -59,6 +59,11 @@ public class Server {
         // TODO: Robot thing but need to be separated
         try {
             Robot robot = new Robot();
+
+            // Auto delay
+            robot.setAutoDelay(40);
+            robot.setAutoWaitForIdle(true);
+
         } catch (AWTException e) {
             e.printStackTrace();
         }
