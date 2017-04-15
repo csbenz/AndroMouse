@@ -3,6 +3,8 @@ import java.awt.event.InputEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -10,7 +12,7 @@ import java.net.Socket;
 public class Server {
 
     public static void main(String[] args) {
-        while (true) {
+        //while (true) {
             // We launch the service for discovering
             Thread discoveryThread = new Thread(DiscoveryThread.getInstance());
             discoveryThread.run();
@@ -19,68 +21,112 @@ public class Server {
 
             // And also the service for packet transmitting
             tcpPacketsExchanges();
-        }
+        //}
     }
 
     private static void tcpPacketsExchanges () {
-        final ServerSocket serveurSocket;
-        final Socket clientSocket;
-        final BufferedReader in;
+        final DatagramSocket socket;
 
         try {
-            serveurSocket = new ServerSocket(7777);
-            System.out.println("Server launched !");
-            clientSocket = serveurSocket.accept();
-            System.out.println("A client has connected !");
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            socket = new DatagramSocket(7777);
+            boolean looping = true;
 
-            Thread recevoir = new Thread(new Runnable() {
-                String msg;
+            while (looping) {
+                byte[] recvBuf = new byte[1000];
+                DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
+                System.out.println(">>>Server waiting for a communication");
+                socket.receive(packet);
 
-                @Override
-                public void run() {
-                    try {
-                        msg = in.readLine();
-                        // tant que le client est connecté
-                        while (msg != null) {
-                            System.out.println("Client : " + msg);
-                            msg = in.readLine();
-                            String[] stringPos = msg.split(",");
-                            String matcher = stringPos[0];
-                            switch (matcher) {
-                                case "V":
-                                    double vx = Double.parseDouble(stringPos[1]);
-                                    double vy = Double.parseDouble(stringPos[2]);
-                                    /// We update the mouse location in the screen according to the received message
-                                    updateCursor(vx, vy);
-                                    break;
+                String msg = new String(packet.getData()).trim();
+                    System.out.println("Client : " + msg);
+                    String[] stringPos = msg.split(",");
+                    String matcher = stringPos[0];
+                    switch (matcher) {
+                        case "V":
+                            double vx = Double.parseDouble(stringPos[1]);
+                            double vy = Double.parseDouble(stringPos[2]);
+                            /// We update the mouse location in the screen according to the received message
+                            updateCursor(vx, vy);
+                            break;
 
-                                case "LC":
-                                    leftClick();
-                                    break;
+                        case "LC":
+                            leftClick();
+                            break;
 
-                                case "RC":
-                                    rightClick();
-                                    break;
+                        case "RC":
+                            rightClick();
+                            break;
 
-                                case "S":
-                                    double x = Double.parseDouble(stringPos[1]);
-                                    double y = Double.parseDouble(stringPos[2]);
-                                    scroll(x, y);
-                                    break;
+                        case "S":
+                            double x = Double.parseDouble(stringPos[1]);
+                            double y = Double.parseDouble(stringPos[2]);
+                            scroll(x, y);
+                            break;
 
-                                default:
-                                    System.err.println("Problem, default value should not be reached !");
+                        case "QUIT":
+                            looping = false;
+                            break;
 
-                            }
-                        }
-                        // sortir de la boucle si le client s'est déconnecté
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        default:
+                            System.err.println("Problem, default value should not be reached !");
+
                     }
-                }
-            });
-            recevoir.start();
+            }
+            // We close the socket
+            socket.close();
+
+//            System.out.println("Server launched !");
+//            clientSocket = socket.accept();
+//            System.out.println("A client has connected !");
+//            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+//
+//            Thread recevoir = new Thread(new Runnable() {
+//                String msg;
+//
+//                @Override
+//                public void run() {
+//                    try {
+//                        msg = in.readLine();
+//                        // tant que le client est connecté
+//                        while (msg != null) {
+//                            System.out.println("Client : " + msg);
+//                            msg = in.readLine();
+//                            String[] stringPos = msg.split(",");
+//                            String matcher = stringPos[0];
+//                            switch (matcher) {
+//                                case "V":
+//                                    double vx = Double.parseDouble(stringPos[1]);
+//                                    double vy = Double.parseDouble(stringPos[2]);
+//                                    /// We update the mouse location in the screen according to the received message
+//                                    updateCursor(vx, vy);
+//                                    break;
+//
+//                                case "LC":
+//                                    leftClick();
+//                                    break;
+//
+//                                case "RC":
+//                                    rightClick();
+//                                    break;
+//
+//                                case "S":
+//                                    double x = Double.parseDouble(stringPos[1]);
+//                                    double y = Double.parseDouble(stringPos[2]);
+//                                    scroll(x, y);
+//                                    break;
+//
+//                                default:
+//                                    System.err.println("Problem, default value should not be reached !");
+//
+//                            }
+//                        }
+//                        // sortir de la boucle si le client s'est déconnecté
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            });
+//            recevoir.start();
         } catch (IOException e) {
             e.printStackTrace();
         }

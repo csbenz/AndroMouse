@@ -54,6 +54,7 @@ public class TestClient {
                                 DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcast, 8888);
                                 c.send(sendPacket);
                             } catch (Exception e) {
+                                e.printStackTrace();
                             }
 
                             System.out.println(getClass().getName() + ">>> Request packet sent to: " + broadcast.getHostAddress() + "; Interface: " + networkInterface.getDisplayName());

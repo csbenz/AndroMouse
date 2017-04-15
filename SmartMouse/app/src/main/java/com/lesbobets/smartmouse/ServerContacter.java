@@ -4,12 +4,15 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.Socket;
 
 public class ServerContacter {
 
-    private Socket clientSocket;
-    private PrintWriter out;
+    private DatagramSocket clientSocket;
+    private InetAddress serverAdress;
 
     public ServerContacter(final String ipAddress, final int port) {
 
@@ -24,8 +27,9 @@ public class ServerContacter {
                         e.printStackTrace();
                     }
 
-                    clientSocket = new Socket(ipAddress, port);
-                    out = new PrintWriter(clientSocket.getOutputStream());
+                    serverAdress = InetAddress.getByName(ipAddress);
+                    Log.d("<<<<", ipAddress + " is the server ip !");
+                    clientSocket = new DatagramSocket(port, serverAdress);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -38,9 +42,16 @@ public class ServerContacter {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if (clientSocket != null && out != null) {
-                    out.println("V," + xVelocity + "," + yVelocity);
-                    out.flush();
+                if (clientSocket != null) {
+                    byte[] toSend = ("V," + xVelocity + "," + yVelocity).getBytes();
+                    DatagramPacket packet = new DatagramPacket(toSend, toSend.length, serverAdress, MainActivity.PORT_PACKETS);
+                    try {
+                        clientSocket.send(packet);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+//                    out.println("V," + xVelocity + "," + yVelocity);
+//                    out.flush();
                 }
             }
         }).start();
@@ -55,9 +66,16 @@ public class ServerContacter {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if (clientSocket != null && out != null) {
-                    out.println("LC");
-                    out.flush();
+                if (clientSocket != null) {
+                    byte[] toSend = ("LC").getBytes();
+                    DatagramPacket packet = new DatagramPacket(toSend, toSend.length, serverAdress, MainActivity.PORT_PACKETS);
+                    try {
+                        clientSocket.send(packet);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+//                    out.println("LC");
+//                    out.flush();
                 }
             }
         }).start();
@@ -69,9 +87,16 @@ public class ServerContacter {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if (clientSocket != null && out != null) {
-                    out.println("RC");
-                    out.flush();
+                if (clientSocket != null) {
+                    byte[] toSend = ("RC").getBytes();
+                    DatagramPacket packet = new DatagramPacket(toSend, toSend.length, serverAdress, MainActivity.PORT_PACKETS);
+                    try {
+                        clientSocket.send(packet);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+//                    out.println("RC");
+//                    out.flush();
                 }
             }
         }).start();
@@ -83,9 +108,16 @@ public class ServerContacter {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if (clientSocket != null && out != null) {
-                    out.println("S,"+distanceX+","+distanceY);
-                    out.flush();
+                if (clientSocket != null) {
+                    byte[] toSend = ("S," + distanceX + "," + distanceY).getBytes();
+                    DatagramPacket packet = new DatagramPacket(toSend, toSend.length, serverAdress, MainActivity.PORT_PACKETS);
+                    try {
+                        clientSocket.send(packet);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+//                    out.println("S,"+distanceX+","+distanceY);
+//                    out.flush();
                 }
             }
         }).start();
