@@ -11,7 +11,11 @@ import java.net.Socket;
 public class Server {
 
     public static void main(String[] args) {
+        Thread discoveryThread = new Thread(DiscoveryThread.getInstance());
+        discoveryThread.run();
+    }
 
+    private static void tcpPacketsExchanges (){
         final ServerSocket serveurSocket;
         final Socket clientSocket;
         final BufferedReader in;
