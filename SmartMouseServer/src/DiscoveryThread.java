@@ -9,7 +9,7 @@ import java.net.InetAddress;
  */
 public class DiscoveryThread implements Runnable {
     private DatagramSocket socket;
-    private int port = 7776;
+    private int port = 7777;
 
     @Override
     public void run() {

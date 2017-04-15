@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private String mServerIP;
 
-    public static int PORT_DISCOVERY = 7776;
+    public static int PORT_DISCOVERY = 7777;
     public static int PORT_PACKETS = 7777;
 
     TwoFingersDetector multiTouchListener = new TwoFingersDetector() {
