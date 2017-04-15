@@ -8,6 +8,12 @@
     tools:context="com.lesbobets.smartmouse.ServersAndParams"
     tools:showIn="@layout/activity_servers_and_params">
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Refresh"
+        android:onClick="refreshComputerList"/>
+
     <ListView
         android:layout_width="368dp"
         android:layout_height="495dp"
