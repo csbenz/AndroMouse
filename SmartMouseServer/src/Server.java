@@ -1,8 +1,6 @@
 import java.awt.*;
 import java.awt.event.InputEvent;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
