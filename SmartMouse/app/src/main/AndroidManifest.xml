@@ -19,7 +19,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ServersAndParams"
+            android:name=".ServersAndParamsActivity"
             android:label="@string/title_activity_servers_and_params"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>

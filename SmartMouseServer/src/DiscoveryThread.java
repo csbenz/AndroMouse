@@ -49,6 +49,8 @@ public class DiscoveryThread implements Runnable {
 
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            socket.close();
         }
     }
 

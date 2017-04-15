@@ -63,7 +63,7 @@ public class TestClient {
                     System.out.println(getClass().getName() + ">>> Done looping over all network interfaces. Now waiting for a reply!");
 
                     //Wait for a response
-                    byte[] recvBuf = new byte[15000];
+                    byte[] recvBuf = new byte[1000];
                     DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
                     c.receive(receivePacket);
 
