@@ -11,18 +11,26 @@ import java.net.Socket;
 public class Server {
 
     public static void main(String[] args) {
-        Thread discoveryThread = new Thread(DiscoveryThread.getInstance());
-        discoveryThread.run();
+        while (true) {
+            // We launch the service for discovering
+            Thread discoveryThread = new Thread(DiscoveryThread.getInstance());
+            discoveryThread.run();
+
+            System.out.println("Discovery process is no longer living !");
+
+            // And also the service for packet transmitting
+            tcpPacketsExchanges();
+        }
     }
 
-    private static void tcpPacketsExchanges (){
+    private static void tcpPacketsExchanges () {
         final ServerSocket serveurSocket;
         final Socket clientSocket;
         final BufferedReader in;
         final PrintWriter out;
 
         try {
-            serveurSocket = new ServerSocket(8000);
+            serveurSocket = new ServerSocket(7777);
             System.out.println("Server launched !");
             clientSocket = serveurSocket.accept();
             System.out.println("A client has connected !");

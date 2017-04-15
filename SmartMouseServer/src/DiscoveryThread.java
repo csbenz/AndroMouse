@@ -9,7 +9,7 @@ import java.net.InetAddress;
  */
 public class DiscoveryThread implements Runnable {
     private DatagramSocket socket;
-    private int port = 8888;
+    private int port = 7776;
 
     @Override
     public void run() {
@@ -21,7 +21,7 @@ public class DiscoveryThread implements Runnable {
             while (true) {
                 /// Receive a packet
                 System.out.println(getClass().getName() + ">>>Ready to receive broadcast packets !");
-                byte[] recvBuf = new byte[15000];
+                byte[] recvBuf = new byte[1000];
                 DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
                 socket.receive(packet);
 
@@ -32,13 +32,18 @@ public class DiscoveryThread implements Runnable {
                 /// See if the packet holds the right command
                 String message = new String(packet.getData()).trim();
                 if (message.equals("DISCOVER_REQUEST")) {
-                    byte[] sendData = "DISCOVER_RESPONSE".getBytes();
+                    byte[] sendData = ("DISCOVER_RESPONSE, " + InetAddress.getLocalHost().getHostName()).getBytes();
 
                     /// Send a response
                     DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
                     socket.send(sendPacket);
 
                     System.out.println(getClass().getName() + ">>>Sent packet to: " + sendPacket.getAddress().getHostAddress());
+                }
+                if (message.equals("START_REQUEST")) {
+                    System.out.println(">>>>Received a start request !!");
+                    // We can just stop waiting for broadcasts message
+                    break;
                 }
             }
 

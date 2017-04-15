@@ -1,11 +1,18 @@
 package com.lesbobets.smartmouse;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -15,13 +22,22 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
-import java.util.ArrayList;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 public class ServersAndParams extends AppCompatActivity {
 
-    private ArrayAdapter<String> listAdapter;
+    private static final String TAG = "ServersAndParams";
+
+    private SetAdapter<String> listAdapter;
     private ListView serversList;
+    private Context context;
+    private static DatagramSocket c;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,23 +45,58 @@ public class ServersAndParams extends AppCompatActivity {
         setContentView(R.layout.activity_servers_and_params);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        context = this;
 
-        listAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        listAdapter = new SetAdapter<>(this, android.R.layout.simple_list_item_1);
 
         serversList = (ListView)findViewById(R.id.servers_list);
         serversList.setAdapter(listAdapter);
+        serversList.setItemsCanFocus(true);
+        serversList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String text = (serversList.getItemAtPosition(position)).toString();
+                final InetAddress ip = listAdapter.getValue(text);
+
+                // Send a packet in another thread
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            byte[] sendData;
+                            sendData = ("START_REQUEST").getBytes();
+                            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, ip, MainActivity.PORT_DISCOVERY);
+                            c.send(sendPacket);
+
+                            //Close the port!
+                            c.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
+
+
+                Intent intent = new Intent(context, MainActivity.class);
+                String ipString = ip.toString().substring(1);
+                Log.d("<<<<<", "IP is " + ipString);
+                intent.putExtra("IP", ipString);
+                startActivity(intent);
+            }
+        });
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                refreshComputerList();
             }
         });
+
+        /// Refresh the list once at start
+        refreshComputerList();
     }
 
-    private static DatagramSocket c;
     public void refreshComputerList () {
         new Thread(new Runnable() {
             @Override
@@ -60,9 +111,9 @@ public class ServersAndParams extends AppCompatActivity {
 
                     //Try the 255.255.255.255 first
                     try {
-                        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName("255.255.255.255"), 8888);
+                        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName("255.255.255.255"), MainActivity.PORT_DISCOVERY);
                         c.send(sendPacket);
-                        System.out.println(getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
+                        Log.d("BROADCAST", getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
                     } catch (Exception e) {
                     }
 
@@ -83,40 +134,73 @@ public class ServersAndParams extends AppCompatActivity {
 
                             // Send the broadcast package!
                             try {
-                                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcast, 8888);
+                                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcast, MainActivity.PORT_DISCOVERY);
                                 c.send(sendPacket);
                             } catch (Exception e) {
                             }
 
-                            System.out.println(getClass().getName() + ">>> Request packet sent to: " + broadcast.getHostAddress() + "; Interface: " + networkInterface.getDisplayName());
+                            Log.d("BROADCAST", getClass().getName() + ">>> Request packet sent to: " + broadcast.getHostAddress() + "; Interface: " + networkInterface.getDisplayName());
                         }
                     }
 
-                    System.out.println(getClass().getName() + ">>> Done looping over all network interfaces. Now waiting for a reply!");
+//                    Log.d("BROADCAST", getClass().getName() + ">>> Done looping over all network interfaces. Now waiting for a reply!");
 
-                    //Wait for a response
-                    byte[] recvBuf = new byte[15000];
-                    DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
-                    c.receive(receivePacket);
+                    long time = System.currentTimeMillis();
+                    long TIMER = 200;
+                    while (System.currentTimeMillis() < time + TIMER) {
+                        //Wait for a response
+                        byte[] recvBuf = new byte[1000];
+                        DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
+                        c.receive(receivePacket);
 
-                    //We have a response
-                    System.out.println(getClass().getName() + ">>> Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
+                        //We have a response
+//                        Log.d("BROADCAST", getClass().getName() + ">>> Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
 
-                    //Check if the message is correct
-                    String message = new String(receivePacket.getData()).trim();
-                    if (message.equals("DISCOVER_RESPONSE")) {
-                        //DO SOMETHING WITH THE SERVER'S IP (for example, store it in your controller)
-                        InetAddress serverIp = receivePacket.getAddress();
-                        listAdapter.add(serverIp.toString());
+                        //Check if the message is correct
+                        final String message = new String(receivePacket.getData()).trim();
+                        final String[] messages = message.split(", ");
+                        if (messages[0].equals("DISCOVER_RESPONSE")) {
+                            final InetAddress serverIp = receivePacket.getAddress();
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    listAdapter.add(messages[1], serverIp);
+                                }
+                            });
+                        }
                     }
 
-                    //Close the port!
-                    c.close();
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
             }
         }).start();
+    }
+
+
+    public class SetAdapter<T> extends ArrayAdapter<T> {
+        private Map<T, InetAddress> mMap;
+
+        public SetAdapter(@NonNull Context context, @LayoutRes int resource, Map<T, InetAddress> map) {
+            super(context, resource);
+            mMap = map;
+        }
+
+        public SetAdapter(@NonNull Context context, @LayoutRes int resource) {
+            super(context, resource);
+            mMap = new HashMap<>();
+        }
+
+        public void add(@Nullable T object, InetAddress ip) {
+            mMap.put(object, ip);
+            super.clear();
+            super.addAll(mMap.keySet());
+        }
+
+        public InetAddress getValue(T key) {
+            return mMap.get(key);
+        }
     }
 
 }

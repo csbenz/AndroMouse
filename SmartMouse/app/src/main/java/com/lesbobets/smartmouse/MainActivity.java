@@ -1,6 +1,6 @@
 package com.lesbobets.smartmouse;
 
-import android.os.AsyncTask;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.VelocityTrackerCompat;
@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
-import android.view.View;
 import android.view.ViewConfiguration;
 
 public class MainActivity extends AppCompatActivity implements
@@ -21,14 +20,15 @@ public class MainActivity extends AppCompatActivity implements
 
     private VelocityTracker mVelocityTracker = null;
 
-    private View v;
-
     private ServerContacter mServerContacter;
-    private AsyncTask<Double[], Void, Void> mAsyncTask;
     private GestureDetectorCompat mDetector;
 
     private long lastPushDownTime = 0;
 
+    private String mServerIP;
+
+    public static int PORT_DISCOVERY = 7776;
+    public static int PORT_PACKETS = 7777;
 
     TwoFingersDetector multiTouchListener = new TwoFingersDetector() {
         @Override
@@ -44,6 +44,10 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Intent intent = getIntent();
+        mServerIP = intent.getStringExtra("IP");
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -54,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void initClient() {
-        mServerContacter = new ServerContacter();
+        mServerContacter = new ServerContacter(mServerIP, MainActivity.PORT_PACKETS);
     }
 
     @Override
@@ -88,7 +92,6 @@ public class MainActivity extends AppCompatActivity implements
                 Log.d(TAG, " Velocities: " + xVelocity + "\t\t" + yVelocity);
 
                 final Double[] velocities = new Double[]{Double.valueOf(xVelocity), Double.valueOf(yVelocity)};
-//                    mAsyncTask.execute(velocities);
                 if (mServerContacter != null) {
                     mServerContacter.sendVelocities(velocities);
                 }

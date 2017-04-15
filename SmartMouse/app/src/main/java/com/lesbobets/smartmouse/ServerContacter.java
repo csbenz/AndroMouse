@@ -10,11 +10,6 @@ public class ServerContacter {
 
     private Socket clientSocket;
     private PrintWriter out;
-    private String myIp = "192.168.8.107";
-
-    public ServerContacter() {
-        this("192.168.8.107", 8000);
-    }
 
     public ServerContacter(final String ipAddress, final int port) {
 
@@ -22,12 +17,17 @@ public class ServerContacter {
             @Override
             public void run() {
                 try {
+                    // Sleep to let the server change process
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
                     clientSocket = new Socket(ipAddress, port);
                     out = new PrintWriter(clientSocket.getOutputStream());
-//                    Log.d("BLABLA", "run: Initialized Client successfully");
                 } catch (IOException e) {
                     e.printStackTrace();
-//                    Log.d("BLABLA", "run: Initialize Client FAILED");
                 }
             }
         }).start();
