@@ -11,6 +11,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 public class MainActivity extends AppCompatActivity implements
         GestureDetector.OnGestureListener,
@@ -56,50 +57,6 @@ public class MainActivity extends AppCompatActivity implements
         mServerContacter = new ServerContacter();
     }
 
-//    private View.OnTouchListener mOnTouchListener = new View.OnTouchListener() {
-//
-//        @Override
-//        public boolean onTouch(View view, MotionEvent event) {
-//            int index = event.getActionIndex();
-//            int action = event.getActionMasked();
-//            int pointerId = event.getPointerId(index);
-//
-//            switch (action) {
-//                case MotionEvent.ACTION_DOWN:
-//                    if (mVelocityTracker == null) {
-//                        mVelocityTracker = VelocityTracker.obtain();
-//                    } else {
-//                        mVelocityTracker.clear();
-//                    }
-//                    mVelocityTracker.addMovement(event);
-//                    break;
-//                case MotionEvent.ACTION_MOVE:
-//                    mVelocityTracker.addMovement(event);
-//                    mVelocityTracker.computeCurrentVelocity(1000);
-//                    float xVelocity = VelocityTrackerCompat.getXVelocity(mVelocityTracker,
-//                            pointerId);
-//                    float yVelocity = VelocityTrackerCompat.getYVelocity(mVelocityTracker,
-//                            pointerId);
-//
-//                    Log.d(TAG, " Velocities: " + xVelocity + "\t\t" + yVelocity);
-//
-//                    final Double[] velocities = new Double[]{Double.valueOf(xVelocity), Double.valueOf(yVelocity)};
-////                    mAsyncTask.execute(velocities);
-//                    if (mServerContacter != null) {
-//                        mServerContacter.sendVelocities(velocities);
-//                    }
-//
-//                    break;
-//                case MotionEvent.ACTION_UP:
-//                case MotionEvent.ACTION_CANCEL:
-//                    mVelocityTracker.recycle();
-//                    mVelocityTracker = null;
-//                    break;
-//            }
-//            return true;
-//        }
-//    };
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         this.multiTouchListener.onTouchEvent(event);
@@ -120,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements
                 lastPushDownTime = System.currentTimeMillis();
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (System.currentTimeMillis() - lastPushDownTime < 50) {
+                if (System.currentTimeMillis() - lastPushDownTime < 10) {
                     return super.onTouchEvent(event);
                 }
                 mVelocityTracker.addMovement(event);
@@ -195,4 +152,32 @@ public class MainActivity extends AppCompatActivity implements
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
         return false;
     }
+
+
+    public abstract class TwoFingersDetector {
+        private final int TIMEOUT = ViewConfiguration.getDoubleTapTimeout() + 100;
+        private long mFirstDownTime = 0;
+
+        private void reset(long time) {
+            mFirstDownTime = time;
+        }
+
+        public boolean onTouchEvent(MotionEvent event) {
+            switch(event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    if(event.getEventTime() - mFirstDownTime > TIMEOUT)
+                        reset(event.getDownTime());
+                    break;
+                case MotionEvent.ACTION_POINTER_UP:
+                    if(event.getPointerCount() == 2)
+                        onTwoFingerTap();
+                    break;
+            }
+
+            return false;
+        }
+
+        public abstract void onTwoFingerTap();
+    }
+
 }
