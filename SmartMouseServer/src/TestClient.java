@@ -9,8 +9,6 @@ import java.util.Enumeration;
 public class TestClient {
 
     private static DatagramSocket c;
-    private static PrintWriter out;
-    private static String myIp = "192.168.8.107";
 
     public static void main (String[] args) throws IOException {
 

@@ -2,6 +2,8 @@ package com.lesbobets.smartmouse;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
@@ -9,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,12 +20,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
+import java.nio.ByteOrder;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,7 +41,7 @@ public class ServersAndParamsActivity extends AppCompatActivity {
 
     private SetAdapter<String> listAdapter;
     private ListView serversList;
-    private static DatagramSocket c;
+    private DatagramSocket c;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,28 +61,8 @@ public class ServersAndParamsActivity extends AppCompatActivity {
                 String text = (serversList.getItemAtPosition(position)).toString();
                 final InetAddress ip = listAdapter.getValue(text);
 
-                // Send a packet in another thread
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            byte[] sendData;
-                            sendData = ("START_REQUEST").getBytes();
-                            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, ip, MainActivity.PORT_DISCOVERY);
-                            c.send(sendPacket);
-
-                            //Close the port!
-                            c.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
-
-
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                String ipString = ip.toString().substring(1);
-                Log.d("<<<<<", "IP is " + ipString);
+                String ipString = ip.getHostAddress();
                 intent.putExtra("IP", ipString);
                 startActivity(intent);
             }
@@ -107,37 +92,27 @@ public class ServersAndParamsActivity extends AppCompatActivity {
 
                     byte[] sendData = "DISCOVER_REQUEST".getBytes();
 
-                    //Try the 255.255.255.255 first
-                    try {
-                        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName("255.255.255.255"), MainActivity.PORT_DISCOVERY);
-                        c.send(sendPacket);
-                        Log.d("BROADCAST", getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
-                    } catch (Exception e) {
-                    }
-
                     // Broadcast the message over all the network interfaces
                     Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
                     while (interfaces.hasMoreElements()) {
                         NetworkInterface networkInterface = (NetworkInterface) interfaces.nextElement();
+                        if (networkInterface.toString().contains("wlan")) {
+                            for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
+                                InetAddress broadcast = interfaceAddress.getBroadcast();
+                                if (broadcast == null) {
+                                    continue;
+                                }
 
-                        if (networkInterface.isLoopback() || !networkInterface.isUp()) {
-                            continue; // Don't want to broadcast to the loopback interface
-                        }
+                                // Send the broadcast package!
+                                try {
+                                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcast, MainActivity.PORT_DISCOVERY);
+                                    c.send(sendPacket);
+                                } catch (Exception e) {
+                                }
 
-                        for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
-                            InetAddress broadcast = interfaceAddress.getBroadcast();
-                            if (broadcast == null) {
-                                continue;
+                                Log.d("BROADCAST", getClass().getName() + ">>> Request packet sent to: " + broadcast.getHostAddress() + "; Interface: " + networkInterface.getDisplayName());
                             }
-
-                            // Send the broadcast package!
-                            try {
-                                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcast, MainActivity.PORT_DISCOVERY);
-                                c.send(sendPacket);
-                            } catch (Exception e) {
-                            }
-
-                            Log.d("BROADCAST", getClass().getName() + ">>> Request packet sent to: " + broadcast.getHostAddress() + "; Interface: " + networkInterface.getDisplayName());
+                            break;
                         }
                     }
 
@@ -168,7 +143,8 @@ public class ServersAndParamsActivity extends AppCompatActivity {
                             });
                         }
                     }
-
+                    // Close port
+//                    c.close();
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }

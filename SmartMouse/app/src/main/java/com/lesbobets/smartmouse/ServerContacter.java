@@ -14,28 +14,24 @@ public class ServerContacter {
     private DatagramSocket clientSocket;
     private InetAddress serverAdress;
 
+
     public ServerContacter(final String ipAddress, final int port) {
 
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // Sleep to let the server change process
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
                     serverAdress = InetAddress.getByName(ipAddress);
-                    Log.d("<<<<", ipAddress + " is the server ip !");
-                    clientSocket = new DatagramSocket(port, serverAdress);
+                    Log.d("<<<<", serverAdress + " is the server ip !");
+                    clientSocket = new DatagramSocket(port);
+                    clientSocket.connect(serverAdress, port);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }).start();
     }
+
 
     public void sendVelocities(final double xVelocity, final double yVelocity) {
 
@@ -50,8 +46,6 @@ public class ServerContacter {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-//                    out.println("V," + xVelocity + "," + yVelocity);
-//                    out.flush();
                 }
             }
         }).start();
@@ -74,8 +68,6 @@ public class ServerContacter {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-//                    out.println("LC");
-//                    out.flush();
                 }
             }
         }).start();
@@ -95,8 +87,6 @@ public class ServerContacter {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-//                    out.println("RC");
-//                    out.flush();
                 }
             }
         }).start();
@@ -116,8 +106,6 @@ public class ServerContacter {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-//                    out.println("S,"+distanceX+","+distanceY);
-//                    out.flush();
                 }
             }
         }).start();

@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private String mServerIP;
 
-    public static int PORT_DISCOVERY = 7777;
+    public static int PORT_DISCOVERY = 7776;
     public static int PORT_PACKETS = 7777;
 
     TwoFingersDetector multiTouchListener = new TwoFingersDetector() {
@@ -61,6 +61,9 @@ public class MainActivity extends AppCompatActivity implements
         mServerContacter = new ServerContacter(mServerIP, MainActivity.PORT_PACKETS);
     }
 
+
+    private int count = 0;
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         this.multiTouchListener.onTouchEvent(event);
@@ -84,18 +87,23 @@ public class MainActivity extends AppCompatActivity implements
                 if (System.currentTimeMillis() - lastPushDownTime < 10) {
                     return super.onTouchEvent(event);
                 }
-                mVelocityTracker.addMovement(event);
-                mVelocityTracker.computeCurrentVelocity(1000);
-                float xVelocity = VelocityTrackerCompat.getXVelocity(mVelocityTracker, pointerId);
-                float yVelocity = VelocityTrackerCompat.getYVelocity(mVelocityTracker, pointerId);
+                // Send only sometimes
+//                if (count < 9) {
+                    mVelocityTracker.addMovement(event);
+                    mVelocityTracker.computeCurrentVelocity(1000);
+                    float xVelocity = VelocityTrackerCompat.getXVelocity(mVelocityTracker, pointerId);
+                    float yVelocity = VelocityTrackerCompat.getYVelocity(mVelocityTracker, pointerId);
 
-                Log.d(TAG, " Velocities: " + xVelocity + "\t\t" + yVelocity);
+//                Log.d(TAG, " Velocities: " + xVelocity + "\t\t" + yVelocity);
 
-                final Double[] velocities = new Double[]{Double.valueOf(xVelocity), Double.valueOf(yVelocity)};
-                if (mServerContacter != null) {
-                    mServerContacter.sendVelocities(velocities);
-                }
-
+                    final Double[] velocities = new Double[]{Double.valueOf(xVelocity), Double.valueOf(yVelocity)};
+                    if (mServerContacter != null) {
+                        mServerContacter.sendVelocities(velocities);
+                    }
+//                } else if (count == 9) {
+//                    count = 0;
+//                }
+//                count++;
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:

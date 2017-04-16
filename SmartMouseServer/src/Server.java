@@ -10,13 +10,15 @@ public class Server {
     public static void main(String[] args) {
         //while (true) {
             // We launch the service for discovering
-            Thread discoveryThread = new Thread(DiscoveryThread.getInstance());
-            discoveryThread.run();
-
-            System.out.println("Discovery process is no longer living !");
+            new Thread(DiscoveryThread.getInstance()).start();
 
             // And also the service for packet transmitting
-            tcpPacketsExchanges();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    tcpPacketsExchanges();
+                }
+            }).start();
         //}
     }
 
@@ -71,74 +73,20 @@ public class Server {
             // We close the socket
             socket.close();
 
-//            System.out.println("Server launched !");
-//            clientSocket = socket.accept();
-//            System.out.println("A client has connected !");
-//            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-//
-//            Thread recevoir = new Thread(new Runnable() {
-//                String msg;
-//
-//                @Override
-//                public void run() {
-//                    try {
-//                        msg = in.readLine();
-//                        // tant que le client est connecté
-//                        while (msg != null) {
-//                            System.out.println("Client : " + msg);
-//                            msg = in.readLine();
-//                            String[] stringPos = msg.split(",");
-//                            String matcher = stringPos[0];
-//                            switch (matcher) {
-//                                case "V":
-//                                    double vx = Double.parseDouble(stringPos[1]);
-//                                    double vy = Double.parseDouble(stringPos[2]);
-//                                    /// We update the mouse location in the screen according to the received message
-//                                    updateCursor(vx, vy);
-//                                    break;
-//
-//                                case "LC":
-//                                    leftClick();
-//                                    break;
-//
-//                                case "RC":
-//                                    rightClick();
-//                                    break;
-//
-//                                case "S":
-//                                    double x = Double.parseDouble(stringPos[1]);
-//                                    double y = Double.parseDouble(stringPos[2]);
-//                                    scroll(x, y);
-//                                    break;
-//
-//                                default:
-//                                    System.err.println("Problem, default value should not be reached !");
-//
-//                            }
-//                        }
-//                        // sortir de la boucle si le client s'est déconnecté
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            });
-//            recevoir.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private static void updateCursor(double vx, double vy) {
-        double alpha = 0.02; /// This is a factor of speed we could be changing (User speed)
+        double alpha = 0.015; /// This is a factor of speed we could be changing (User speed)
 
         try {
-            /// The robot useful to move the mouse then
             Robot robot = new Robot();
 
             /// Get current mouse position
             Point pos = MouseInfo.getPointerInfo().getLocation();
-
-            // Auto delay
+            // Move
             robot.mouseMove((int)(pos.x + alpha*vx), (int)(pos.y + alpha*vy));
 
         } catch (AWTException e) {
@@ -148,7 +96,6 @@ public class Server {
 
     private static void leftClick() {
         try {
-            /// The robot useful to click
             Robot robot = new Robot();
             robot.mousePress(InputEvent.BUTTON1_MASK);
             robot.mouseRelease(InputEvent.BUTTON1_MASK);
@@ -160,7 +107,6 @@ public class Server {
 
     private static void rightClick() {
         try {
-            /// The robot useful to click
             Robot robot = new Robot();
             robot.mousePress(InputEvent.BUTTON3_MASK);
             robot.mouseRelease(InputEvent.BUTTON3_MASK);
@@ -172,7 +118,6 @@ public class Server {
 
     private static void scroll(double x, double y) {
         try {
-            /// The robot useful to click
             Robot robot = new Robot();
             robot.mouseWheel((int)x);
 
